@@ -107,7 +107,7 @@ const addCategoryButtons = items => {
   }
 };
 
-fetch('pics.json').then(res => {
+fetch('data.json').then(res => {
   return res.json();
 }).then(data => {
   console.log(data);
@@ -190,20 +190,4 @@ const changeTab = (evt, tabName) => {
 };
 document.getElementById('defaultOpen').click();
 
-// const form = document.forms.namedItem('fileInfo');
-// form.addEventListener('submit', function(ev) {
-//   const formData = new FormData();
-//   formData.append('category', form.category);
-//   formData.append('title', form.title);
-//   formData.append('description', form.description);
-//   formData.append('file', form.file);
-//
-//   request.post({url: 'http://localhost:3000/upload', formData: formData},
-//       (err, httpResponse, body) => {
-//         if (err) {
-//           return console.error('upload failed:', err);
-//         }
-//         console.log('Upload successful!  Server responded with:', body);
-//       });
-//
-// }, false);
+
