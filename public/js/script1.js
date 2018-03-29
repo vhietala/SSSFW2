@@ -118,6 +118,21 @@ fetch('data.json').then(res => {
   this.filteredArray = this.picArray;
 });
 
+// const url = 'http://localhost:3000/getdata';
+// fetch(url, {
+//   method: 'get',
+// }).then(data => {
+//   console.log(data);
+//   this.picArray.append(data);
+//   console.log(this.picArray);
+//   clearContainer();
+//   fillDiv(this.picArray);
+//   addCategoryButtons(this.picArray);
+//   this.filteredArray = this.picArray;
+// });
+
+
+
 span.onclick = () => {
   modal.style.display = 'none';
 };
@@ -134,7 +149,8 @@ window.onclick = event => {
 };
 
 let sortIndex = 0;
-const sorter = ['id', 'category', 'time'];
+//const sorter = ['id', 'category', 'time'];
+const sorter = ['category', 'time'];
 
 document.getElementById('sort-text').innerHTML = sorter[sortIndex];
 
@@ -199,7 +215,7 @@ document.querySelector('#picForm').addEventListener('submit', (evt) => {
 
   data.append('file', file);
 
-  const url = 'http://localhost:3000/new';
+  const url = '/new';
 
   fetch(url, {
     method: 'post',
@@ -208,7 +224,7 @@ document.querySelector('#picForm').addEventListener('submit', (evt) => {
     return resp.json();
   }).then((json) => {
     console.log(json);
-
+  }).then((resp) => {
     update();
     document.getElementById('defaultOpen').click();
   });

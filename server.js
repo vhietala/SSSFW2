@@ -21,7 +21,7 @@ const moment = require('moment');
 app.use(express.static('public'));
 
 const picSchema = new Schema({
-  id: Number,
+//  id: Number,
   time: Date,
   category: String,
   title: String,
@@ -36,7 +36,7 @@ const picSchema = new Schema({
 });
 
 mongoose.connect(
-    `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`).
+    `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`).
     then(() => {
       console.log('Connected successfully.');
       app.listen(3000);
@@ -47,6 +47,7 @@ mongoose.connect(
 const Pic = mongoose.model('Pic', picSchema);
 
 app.post('/new', upload.single('file'), function(req, res, next) {
+ // req.body.id = Pic.find().nextNode();
   req.body.time = moment();
   req.body.original = 'original/' + req.file.filename;
   console.log(req.body.coordinates);
@@ -115,18 +116,18 @@ app.use((req, res, next) => {
       console.error(err);
     });
   });
+  res.send(req.body);
   next();
-  //res.send(req.body);
 });
 
-app.use((req, res) => {
-  Pic.create(req).then(req => {
-    res.send(req.body);
+app.use((req, res, next) => {
+  Pic.create(req).then(data => {
+    console.log(data);
   });
 });
 
 app.get('/getdata', (req, res) => {
-  const response = Pic.find().then(data=>{
+  Pic.find().then(data=>{
     res.send(data);
   })
 });
