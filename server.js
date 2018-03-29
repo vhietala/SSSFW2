@@ -1,19 +1,24 @@
 'use strict';
 
 const express = require('express');
+const app = express();
+
 const multer = require('multer');
-// const upload = multer();
+const upload = multer({dest: 'public/original/'});
+
+const sharp = require('sharp');
+const ExifImage = require('exif').ExifImage;
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const bodyParser = require('body-parser');
 
 const dotenv = require('dotenv').config();
 
-const app = express();
-const upload = multer({dest: 'public/original/'});
+const jsonfile = require('jsonfile');
 
-const jsonParser = bodyParser.json();
-const urlencodedParser = bodyParser.urlencoded({extended: false});
+const moment = require('moment');
+
+app.use(express.static('public'));
 
 const picSchema = new Schema({
   id: Number,
@@ -30,22 +35,18 @@ const picSchema = new Schema({
   original: String,
 });
 
-
-
 mongoose.connect(
     `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/test`).
     then(() => {
       console.log('Connected successfully.');
-      app.use(express.static('public'));
       app.listen(3000);
     }, err => {
       console.log('Connection to db failed: ' + err);
     });
 
 const Pic = mongoose.model('Pic', picSchema);
-const router = express.Router();
 
-app.post('/upload', upload.single('file'), function(req, res, next) {
+app.post('/new', upload.single('file'), function(req, res, next) {
   req.body.time = moment();
   req.body.original = 'original/' + req.file.filename;
   console.log(req.body.coordinates);
@@ -53,7 +54,6 @@ app.post('/upload', upload.single('file'), function(req, res, next) {
   console.log(JSON.stringify(req.body));
   next();
 });
-
 
 app.use((req, res, next) => {
   try {
@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const thumbPath = 'thumb/' + req.file.filename;
 
-  sharp(req.file.path).
+  sharp('public/original/'+req.file.filename).
       resize(320, 300).
       toFile('public/' + thumbPath, (err, info) => {
         console.log(err);
@@ -94,7 +94,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   const medPath = 'img/' + req.file.filename;
 
-  sharp(req.file.path).
+  sharp('public/original/'+req.file.filename).
       resize(770, 720).
       toFile('public/' + medPath, (err, info) => {
         console.log(err);
@@ -115,11 +115,25 @@ app.use((req, res, next) => {
       console.error(err);
     });
   });
-  res.send(req.body);
+  next();
+  //res.send(req.body);
+});
+
+app.use((req, res) => {
+  Pic.create(req).then(req => {
+    res.send(req.body);
+  });
+});
+
+app.get('/getdata', (req, res) => {
+  const response = Pic.find().then(data=>{
+    res.send(data);
+  })
 });
 
 const gpsToDecimal = (gpsData, hem) => {
   let d = parseFloat(gpsData[0]) + parseFloat(gpsData[1] / 60) +
       parseFloat(gpsData[2] / 3600);
-  return (hem == 'S' || hem == 'W') ? d *= -1 : d;
+  return (hem === 'S' || hem === 'W') ? d *= -1 : d;
 };
+

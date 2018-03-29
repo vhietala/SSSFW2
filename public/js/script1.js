@@ -191,3 +191,27 @@ const changeTab = (evt, tabName) => {
 document.getElementById('defaultOpen').click();
 
 
+document.querySelector('#picForm').addEventListener('submit', (evt) => {
+  evt.preventDefault();
+  const data = new FormData(evt.target);
+  const fileElement = event.target.querySelector('input[type=file]');
+  const file = fileElement.files[0];
+
+  data.append('file', file);
+
+  const url = 'http://localhost:3000/new';
+
+  fetch(url, {
+    method: 'post',
+    body: data,
+  }).then((resp) => {
+    return resp.json();
+  }).then((json) => {
+    console.log(json);
+
+    update();
+    document.getElementById('defaultOpen').click();
+  });
+});
+
+
